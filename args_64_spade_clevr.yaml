@@ -35,7 +35,7 @@ spade_gen_blocks: True
 feats_in_gcn: True
 feats_out_gcn: True
 is_baseline: False
-is_supervised: True
+is_supervised: False
 num_iterations: 50000
 
 # LOGGING OPTIONS
