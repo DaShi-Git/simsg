@@ -397,6 +397,16 @@ class SIMSGModel(nn.Module):
         print('pred_vecs', pred_vecs.size())
         in_image = src_image.clone()
 
+        C_delta_latents = torch.floor(torch.FloatTensor(pred_vecs.size()[0]).uniform_(0, pred_vecs.size()[1])).to(torch.int64)
+
+        # a = torch.floor(torch.FloatTensor(10).uniform_(0, 5)).to(torch.int64)
+        C_delta_latents = torch.nn.functional.one_hot(C_delta_latents, pred_vecs.size()[1])
+        epsilon = 0.4
+        delta_target = C_delta_latents*epsilon
+        pred_vecs = delta_target + pred_vecs
+        
+
+
         # GCN pass
         if isinstance(self.gconv, nn.Linear):
             obj_vecs = self.gconv(obj_vecs)
@@ -509,6 +519,7 @@ class SIMSGModel(nn.Module):
             layout = torch.cat([layout, layout_noise], dim=1)
 
         img2 = self.decoder_net(layout)
+        print('img1',img,'img2', img2)
 
         if get_layout_boxes:
             return img, boxes_pred, masks_pred, in_image, generated, layout_boxes
