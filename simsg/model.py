@@ -269,6 +269,8 @@ class SIMSGModel(nn.Module):
             obj_vecs = self.layer_norm(obj_vecs)
 
         pred_vecs = self.pred_embeddings(p)
+        obj_vecs_ori = obj_vecs.clone()
+        pred_vecs_ori = pred_vecs.clone()
 
         # GCN pass
         if isinstance(self.gconv, nn.Linear):
@@ -390,8 +392,10 @@ class SIMSGModel(nn.Module):
 
         # belong is for img2
 
-        pred_vecs = self.pred_embeddings(p)
+        pred_vecs = pred_vecs_ori
+        obj_vecs = obj_vecs_ori
         print('pred_vecs', pred_vecs.size())
+        in_image = src_image.clone()
 
         # GCN pass
         if isinstance(self.gconv, nn.Linear):
@@ -402,7 +406,7 @@ class SIMSGModel(nn.Module):
             obj_vecs, pred_vecs = self.gconv_net(obj_vecs, pred_vecs, edges)
 
         # Box prediction network
-        boxes_pred = self.box_net(obj_vecs)
+        #boxes_pred = self.box_net(obj_vecs)
 
         # Mask prediction network
         masks_pred = None
