@@ -381,7 +381,7 @@ class SIMSGModel(nn.Module):
 
             layout = torch.cat([layout, layout_noise], dim=1)
 
-        img = self.decoder_net(layout).copy
+        img = self.decoder_net(layout).copy()
 
         # visualize layout for debugging purposes
         #if t % 50 == 0:
