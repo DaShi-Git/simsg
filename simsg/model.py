@@ -391,7 +391,7 @@ class SIMSGModel(nn.Module):
         # belong is for img2
 
         pred_vecs = self.pred_embeddings(p)
-        print('pred_vecs'. pred_vecs.size())
+        print('pred_vecs', pred_vecs.size())
 
         # GCN pass
         if isinstance(self.gconv, nn.Linear):
