@@ -407,7 +407,7 @@ def main(args):
 
         model_out = model(objs, triples, obj_to_img,
                           boxes_gt=model_boxes, masks_gt=model_masks, src_image=imgs_in, imgs_src=imgs_src, t=t)
-        imgs_pred, boxes_pred, masks_pred, layout_mask, _ = model_out
+        imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2 = model_out
 
       with timeit('loss', args.timing):
         # Skip the pixel loss if not using GT boxes
