@@ -394,7 +394,7 @@ class SIMSGModel(nn.Module):
 
         pred_vecs = pred_vecs_ori
         obj_vecs = obj_vecs_ori
-        print('pred_vecs', pred_vecs.size())
+        #print('pred_vecs', pred_vecs.size())
         in_image = src_image.clone()
 
         C_delta_latents = torch.floor(torch.FloatTensor(pred_vecs.size()[0]).uniform_(0, pred_vecs.size()[1])).to(torch.int64)
@@ -520,12 +520,12 @@ class SIMSGModel(nn.Module):
             layout = torch.cat([layout, layout_noise], dim=1)
 
         img2 = self.decoder_net(layout)
-        print('img1',img,'img2', img2)
+        #print('img1',img,'img2', img2)
 
         if get_layout_boxes:
             return img, boxes_pred, masks_pred, in_image, generated, layout_boxes
         else:
-            return img, boxes_pred, masks_pred, in_image, generated, img2
+            return img, boxes_pred, masks_pred, in_image, generated, img2, C_delta_latents
 
     def forward_visual_feats(self, img, boxes):
         """

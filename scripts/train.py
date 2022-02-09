@@ -40,6 +40,7 @@ from simsg.metrics import jaccard
 from simsg.model import SIMSGModel
 from simsg.utils import int_tuple
 from simsg.utils import timeit, bool_flag, LossManager
+from simsg.recognizor import ResNet
 
 from simsg.loader_utils import build_train_loaders
 from scripts.train_utils import *
@@ -326,6 +327,10 @@ def main(args):
 
   obj_discriminator, d_obj_kwargs = build_obj_discriminator(args, vocab)
   img_discriminator, d_img_kwargs = build_img_discriminator(args, vocab)
+  Recognizor = ResNet(6, 128)
+  optimizer_recognizor = torch.optim.Adam(Recognizor.parameters(),
+                                       lr=args.learning_rate)
+  
 
   gan_g_loss, gan_d_loss = get_gan_losses(args.gan_loss_type)
 
@@ -407,7 +412,7 @@ def main(args):
 
         model_out = model(objs, triples, obj_to_img,
                           boxes_gt=model_boxes, masks_gt=model_masks, src_image=imgs_in, imgs_src=imgs_src, t=t)
-        imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2 = model_out
+        imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2, C_delta_latents = model_out
 
       with timeit('loss', args.timing):
         # Skip the pixel loss if not using GT boxes
@@ -415,6 +420,20 @@ def main(args):
         total_loss, losses = calculate_model_losses(
                                 args, skip_pixel_loss, imgs, imgs_pred,
                                 boxes, boxes_pred)
+      # regcognizor:
+      regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
+      def calc_vc_loss(C_delta_latents, regress_out):
+        prob_C = torch.nn.softmax(regress_out, 1)
+        I_loss_C = C_delta_latents * torch.log(prob_C + 1e-12)
+        I_loss_C = torch.sum(I_loss_C, 1)
+        I_loss = - I_loss_C
+        return I_loss
+
+
+
+      I_loss = calc_vc_loss(C_delta_latents, regress_out)
+      total_loss = add_loss(total_loss, I_loss, losses,
+                              'I_loss', args.d_img_weight)
 
       if obj_discriminator is not None:
 
@@ -561,6 +580,12 @@ def main(args):
         optimizer_d_img.zero_grad()
         d_img_losses.total_loss.backward()
         optimizer_d_img.step()
+      
+      I_opt_losses = LossManager()
+      I_opt_losses.add_loss(I_loss, 'I_loss')
+      optimizer_recognizor.zero_grad()
+      I_opt_losses.total_loss.backward()
+      optimizer_recognizor.step()
 
       if t % args.print_every == 0:
 
@@ -569,6 +594,7 @@ def main(args):
           print_D_obj_state(args, t, writer, checkpoint, d_obj_losses)
         if img_discriminator is not None:
           print_D_img_state(args, t, writer, checkpoint, d_img_losses)
+        print('I_loss', I_opt_losses)
 
       if t % args.checkpoint_every == 0:
         print('checking on train')
