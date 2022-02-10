@@ -40,7 +40,7 @@ from simsg.metrics import jaccard
 from simsg.model import SIMSGModel
 from simsg.utils import int_tuple
 from simsg.utils import timeit, bool_flag, LossManager
-from simsg.recognizor import ResNet
+from simsg.recognizor import Recog
 
 from simsg.loader_utils import build_train_loaders
 from scripts.train_utils import *
@@ -327,7 +327,7 @@ def main(args):
 
   obj_discriminator, d_obj_kwargs = build_obj_discriminator(args, vocab)
   img_discriminator, d_img_kwargs = build_img_discriminator(args, vocab)
-  Recognizor = ResNet(6, 128)
+  Recognizor = Recog(6, 128)
   Recognizor = Recognizor.to('cuda')
   optimizer_recognizor = torch.optim.Adam(Recognizor.parameters(),
                                        lr=args.learning_rate)
