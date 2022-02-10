@@ -158,11 +158,11 @@ class ResNet(nn.Module):
         return x
 
 class Recog(nn.Module):
-    def __init__(self, in_channels, n_classes):
+    def __init__(self, in_channels, n_classes, dim):
         super().__init__()
         self.recog = ResNet(in_channels, n_classes)
         #self.output_dim1 = output_dim1
-        self.hid1 = nn.Sequential(nn.Linear(32*482, 482*64, bias=True), nn.ReLU())
+        self.hid1 = nn.Sequential(nn.Linear(dim*482, 482*64, bias=True), nn.ReLU())
         self.hid2 = nn.Sequential(nn.Linear(482*64, 482*64, bias=True), nn.ReLU())
         self.hid3 = nn.Sequential(nn.Linear(482*64, 482*128, bias=True), nn.ReLU())
         

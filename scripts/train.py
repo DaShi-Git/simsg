@@ -327,7 +327,7 @@ def main(args):
 
   obj_discriminator, d_obj_kwargs = build_obj_discriminator(args, vocab)
   img_discriminator, d_img_kwargs = build_img_discriminator(args, vocab)
-  Recognizor = Recog(6, 128)
+  Recognizor = Recog(6, 128, args.batch_size *2)
   Recognizor = Recognizor.to('cuda')
   optimizer_recognizor = torch.optim.Adam(Recognizor.parameters(),
                                        lr=args.learning_rate)
