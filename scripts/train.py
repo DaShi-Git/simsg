@@ -413,7 +413,7 @@ def main(args):
 
         model_out = model(objs, triples, obj_to_img,
                           boxes_gt=model_boxes, masks_gt=model_masks, src_image=imgs_in, imgs_src=imgs_src, t=t)
-        imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2, C_delta_latents = model_out
+        imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2, C_delta_latents, out_dim1 = model_out
 
       with timeit('loss', args.timing):
         # Skip the pixel loss if not using GT boxes
@@ -423,7 +423,7 @@ def main(args):
                                 boxes, boxes_pred)
       # regcognizor:
       print('img dim', imgs_pred.size())
-      regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
+      regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
       def calc_vc_loss(C_delta_latents, regress_out):
         prob_C = torch.nn.functional.softmax(regress_out, 1)
         print('C_latent', C_delta_latents.size())

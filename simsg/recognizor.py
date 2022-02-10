@@ -1,3 +1,4 @@
+from audioop import bias
 import torch
 import torch.nn as nn
 
@@ -155,3 +156,23 @@ class ResNet(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
+
+class Recog(nn.Module):
+    def __init__(self, in_channels, n_classes):
+        super().__init__()
+        self.recog = ResNet(in_channels, n_classes)
+        #self.output_dim1 = output_dim1
+        
+
+    def forward(self, x, output_dim1):
+        x = self.recog(x)
+        self.hid1 = nn.Sequential(nn.Linear(x.size(0)*x.size(1), 482*64, bias=True), nn.ReLU())
+        self.hid2 = nn.Sequential(nn.Linear(482*64, 482*64, bias=True), nn.ReLU())
+        self.hid3 = nn.Sequential(nn.Linear(482*64, 482*128, bias=True), nn.ReLU())
+        x = torch.flatten(x)
+        x = self.hid1(x)
+        x  = self.hid2(x)
+        x = self.hid3(x)
+        x = x.view(output_dim1, 128)
+        return x
+

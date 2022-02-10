@@ -525,7 +525,7 @@ class SIMSGModel(nn.Module):
         if get_layout_boxes:
             return img, boxes_pred, masks_pred, in_image, generated, layout_boxes
         else:
-            return img, boxes_pred, masks_pred, in_image, generated, img2, C_delta_latents
+            return img, boxes_pred, masks_pred, in_image, generated, img2, C_delta_latents, pred_vecs.size(0)
 
     def forward_visual_feats(self, img, boxes):
         """
