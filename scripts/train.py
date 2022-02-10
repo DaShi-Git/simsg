@@ -425,6 +425,9 @@ def main(args):
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
       def calc_vc_loss(C_delta_latents, regress_out):
         prob_C = torch.nn.functional.softmax(regress_out, 1)
+        print('C_latent', C_delta_latents.size())
+        print('prob_c', prob_C.size())
+        print('regress', regress_out.size())
         I_loss_C = C_delta_latents * torch.log(prob_C + 1e-12)
         I_loss_C = torch.sum(I_loss_C, 1)
         I_loss = - I_loss_C
