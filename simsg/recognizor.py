@@ -162,13 +162,14 @@ class Recog(nn.Module):
         super().__init__()
         self.recog = ResNet(in_channels, n_classes)
         #self.output_dim1 = output_dim1
+        self.hid1 = nn.Sequential(nn.Linear(32*482, 482*64, bias=True), nn.ReLU())
+        self.hid2 = nn.Sequential(nn.Linear(482*64, 482*64, bias=True), nn.ReLU())
+        self.hid3 = nn.Sequential(nn.Linear(482*64, 482*128, bias=True), nn.ReLU())
         
 
     def forward(self, x, output_dim1):
         x = self.recog(x)
-        self.hid1 = nn.Sequential(nn.Linear(x.size(0)*x.size(1), 482*64, bias=True), nn.ReLU())
-        self.hid2 = nn.Sequential(nn.Linear(482*64, 482*64, bias=True), nn.ReLU())
-        self.hid3 = nn.Sequential(nn.Linear(482*64, 482*128, bias=True), nn.ReLU())
+        
         x = torch.flatten(x)
         x = self.hid1(x)
         x  = self.hid2(x)
