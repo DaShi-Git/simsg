@@ -99,7 +99,7 @@ class ResNetEncoder(nn.Module):
     """
     ResNet encoder composed by increasing different layers with increasing features.
     """
-    def __init__(self, in_channels=3, blocks_sizes=[16, 32, 32, 64], deepths=[1,1,1,1],  #block [32, 64, 128, 128]
+    def __init__(self, in_channels=3, blocks_sizes=[16, 32, 64, 128], deepths=[1,1,1,1],  #block [32, 64, 128, 128]
                  activation=nn.ReLU, block=ResNetBasicBlock, *args,**kwargs):
         super().__init__()
         
