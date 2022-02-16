@@ -426,6 +426,7 @@ def main(args):
       # regcognizor:
       print('img dim', imgs_pred.size())
       print('img device', imgs_pred.get_device())
+      print('C_delta_latents device', C_delta_latents.get_device())
       # regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
       # regress_out = torch.sum(regress_out, 0)
