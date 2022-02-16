@@ -394,11 +394,17 @@ class SIMSGModel(nn.Module):
 
         # belong is for img2
 
-        pred_vecs = pred_vecs_ori
-        #print('pred_vec',pred_vecs.size())
-        obj_vecs = obj_vecs_ori
-        #print('pred_vecs', pred_vecs.size())
-        in_image = src_image.clone()
+        # pred_vecs = pred_vecs_ori
+        # #print('pred_vec',pred_vecs.size())
+        # obj_vecs = obj_vecs_ori
+        # #print('pred_vecs', pred_vecs.size())
+        # in_image = src_image.clone()
+        dim0 = layout.size(0)
+        dim1 = layout.size(1)
+        dim2 = layout.size(2)
+        dim3 = layout.size(3)
+
+        pred_vecs = layout.view(dim0, dim1*dim2*dim3)
 
         C_delta_latents = torch.floor(torch.FloatTensor(pred_vecs.size()[0]).uniform_(0, pred_vecs.size()[1])).to(torch.int64)
 
@@ -408,127 +414,130 @@ class SIMSGModel(nn.Module):
         delta_target = C_delta_latents*epsilon
         delta_target = delta_target.to('cuda')
         pred_vecs = delta_target + pred_vecs
+
+        layout = pred_vecs.view(dim0, dim1, dim2, dim3)
+        img2 = self.decoder_net(layout)
         
 
 
         # GCN pass
-        if isinstance(self.gconv, nn.Linear):
-            obj_vecs = self.gconv(obj_vecs)
-        else:
-            obj_vecs, pred_vecs = self.gconv(obj_vecs, pred_vecs, edges)
-        if self.gconv_net is not None:
-            obj_vecs, pred_vecs = self.gconv_net(obj_vecs, pred_vecs, edges)
+        # if isinstance(self.gconv, nn.Linear):
+        #     obj_vecs = self.gconv(obj_vecs)
+        # else:
+        #     obj_vecs, pred_vecs = self.gconv(obj_vecs, pred_vecs, edges)
+        # if self.gconv_net is not None:
+        #     obj_vecs, pred_vecs = self.gconv_net(obj_vecs, pred_vecs, edges)
 
-        # Box prediction network
-        #boxes_pred = self.box_net(obj_vecs)
+        # # Box prediction network
+        # #boxes_pred = self.box_net(obj_vecs)
 
-        # Mask prediction network
-        masks_pred = None
-        if self.mask_net is not None:
-            mask_scores = self.mask_net(obj_vecs.view(num_objs, -1, 1, 1))
-            masks_pred = mask_scores.squeeze(1).sigmoid()
+        # # Mask prediction network
+        # masks_pred = None
+        # if self.mask_net is not None:
+        #     mask_scores = self.mask_net(obj_vecs.view(num_objs, -1, 1, 1))
+        #     masks_pred = mask_scores.squeeze(1).sigmoid()
 
-        if not (self.is_baseline or self.is_supervised) and self.feats_out_gcn:
-            obj_vecs = torch.cat([obj_vecs, feats_prior], 1)
-            obj_vecs = self.layer_norm2(obj_vecs)
+        # if not (self.is_baseline or self.is_supervised) and self.feats_out_gcn:
+        #     obj_vecs = torch.cat([obj_vecs, feats_prior], 1)
+        #     obj_vecs = self.layer_norm2(obj_vecs)
 
-        use_predboxes = False
+        # use_predboxes = False
 
-        H, W = self.image_size
+        # H, W = self.image_size
 
-        if self.is_baseline or self.is_supervised:
+        # if self.is_baseline or self.is_supervised:
 
-            layout_boxes = boxes_pred if boxes_gt is None else boxes_gt
-            box_ones = torch.ones([num_objs, 1], dtype=boxes_gt.dtype, device=boxes_gt.device)
+        #     layout_boxes = boxes_pred if boxes_gt is None else boxes_gt
+        #     box_ones = torch.ones([num_objs, 1], dtype=boxes_gt.dtype, device=boxes_gt.device)
 
-            box_keep = self.prepare_keep_idx(evaluating, box_ones, in_image.size(0), obj_to_img, keep_box_idx,
-                                                keep_feat_idx, with_feats=False)
+        #     box_keep = self.prepare_keep_idx(evaluating, box_ones, in_image.size(0), obj_to_img, keep_box_idx,
+        #                                         keep_feat_idx, with_feats=False)
 
-            # mask out objects
-            if not evaluating:
-                keep_image_idx = box_keep
+        #     # mask out objects
+        #     if not evaluating:
+        #         keep_image_idx = box_keep
 
-            for box_id in range(keep_image_idx.size(0)):
-                if keep_image_idx[box_id] == 0:
-                    in_image = mask_image_in_bbox(in_image, boxes_gt, box_id, obj_to_img)
-            generated = None
+        #     for box_id in range(keep_image_idx.size(0)):
+        #         if keep_image_idx[box_id] == 0:
+        #             in_image = mask_image_in_bbox(in_image, boxes_gt, box_id, obj_to_img)
+        #     generated = None
 
-        else:
-            if use_predboxes:
-                layout_boxes = boxes_pred
-            else:
-                layout_boxes = boxes_gt.clone()
+        # else:
+        #     if use_predboxes:
+        #         layout_boxes = boxes_pred
+        #     else:
+        #         layout_boxes = boxes_gt.clone()
 
-            if evaluating:
-                # should happen on evaluation only
-                # drop region in image corresponding to predicted box
-                # so that a new content/object is generated there
-                for idx in range(len(keep_box_idx)):
-                    if keep_box_idx[idx] == 0 and combine_gt_pred_box_idx[idx] == 0:
-                        in_image = mask_image_in_bbox(in_image, boxes_pred, idx, obj_to_img)
-                        layout_boxes[idx] = boxes_pred[idx]
+        #     if evaluating:
+        #         # should happen on evaluation only
+        #         # drop region in image corresponding to predicted box
+        #         # so that a new content/object is generated there
+        #         for idx in range(len(keep_box_idx)):
+        #             if keep_box_idx[idx] == 0 and combine_gt_pred_box_idx[idx] == 0:
+        #                 in_image = mask_image_in_bbox(in_image, boxes_pred, idx, obj_to_img)
+        #                 layout_boxes[idx] = boxes_pred[idx]
 
-                    if keep_box_idx[idx] == 0 and combine_gt_pred_box_idx[idx] == 1:
-                        layout_boxes[idx] = combine_boxes(boxes_gt[idx], boxes_pred[idx])
-                        in_image = mask_image_in_bbox(in_image, layout_boxes, idx, obj_to_img)
+        #             if keep_box_idx[idx] == 0 and combine_gt_pred_box_idx[idx] == 1:
+        #                 layout_boxes[idx] = combine_boxes(boxes_gt[idx], boxes_pred[idx])
+        #                 in_image = mask_image_in_bbox(in_image, layout_boxes, idx, obj_to_img)
 
-            generated = torch.zeros([obj_to_img.size(0)], device=obj_to_img.device,
-                                                        dtype=obj_to_img.dtype)
-            if not evaluating:
-                keep_image_idx = box_keep * feats_keep
+        #     generated = torch.zeros([obj_to_img.size(0)], device=obj_to_img.device,
+        #                                                 dtype=obj_to_img.dtype)
+        #     if not evaluating:
+        #         keep_image_idx = box_keep * feats_keep
 
-            for idx in range(len(keep_image_idx)):
-                if keep_image_idx[idx] == 0:
-                    in_image = mask_image_in_bbox(in_image, boxes_gt, idx, obj_to_img)
-                    generated[idx] = 1
+        #     for idx in range(len(keep_image_idx)):
+        #         if keep_image_idx[idx] == 0:
+        #             in_image = mask_image_in_bbox(in_image, boxes_gt, idx, obj_to_img)
+        #             generated[idx] = 1
 
-            generated = generated > 0
+        #     generated = generated > 0
 
-        if masks_pred is None:
-            layout = boxes_to_layout(obj_vecs, layout_boxes, obj_to_img, H, W,
-                                     pooling=self.layout_pooling)
-        else:
-            layout_masks = masks_pred if masks_gt is None else masks_gt
-            layout = masks_to_layout(obj_vecs, layout_boxes, layout_masks,
-                                     obj_to_img, H, W, pooling=self.layout_pooling)#, front_idx=1-keep_box_idx)
+        # if masks_pred is None:
+        #     layout = boxes_to_layout(obj_vecs, layout_boxes, obj_to_img, H, W,
+        #                              pooling=self.layout_pooling)
+        # else:
+        #     layout_masks = masks_pred if masks_gt is None else masks_gt
+        #     layout = masks_to_layout(obj_vecs, layout_boxes, layout_masks,
+        #                              obj_to_img, H, W, pooling=self.layout_pooling)#, front_idx=1-keep_box_idx)
 
-        noise_occluding = True
+        # noise_occluding = True
 
-        if self.image_feats_branch:
+        # if self.image_feats_branch:
 
-            N, C, H, W = layout.size()
-            noise_shape = (N, 3, H, W)
-            if noise_occluding:
-                layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
-                                           device=layout.device)
-            else:
-                layout_noise = torch.zeros(noise_shape, dtype=layout.dtype,
-                                           device=layout.device)
+        #     N, C, H, W = layout.size()
+        #     noise_shape = (N, 3, H, W)
+        #     if noise_occluding:
+        #         layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
+        #                                    device=layout.device)
+        #     else:
+        #         layout_noise = torch.zeros(noise_shape, dtype=layout.dtype,
+        #                                    device=layout.device)
 
-            in_image[:, :3, :, :] = layout_noise * in_image[:, 3:4, :, :] + in_image[:, :3, :, :] * (
-                        1 - in_image[:, 3:4, :, :])
-            img_feats = self.conv_img(in_image)
+        #     in_image[:, :3, :, :] = layout_noise * in_image[:, 3:4, :, :] + in_image[:, :3, :, :] * (
+        #                 1 - in_image[:, 3:4, :, :])
+        #     img_feats = self.conv_img(in_image)
 
-            layout = torch.cat([layout, img_feats], dim=1)
+        #     layout = torch.cat([layout, img_feats], dim=1)
 
-        elif self.layout_noise_dim > 0:
-            N, C, H, W = layout.size()
-            noise_shape = (N, self.layout_noise_dim, H, W)
-            if self.is_supervised:
-                layout_noise = self.im_to_noise_conv(imgs_src)
-            else:
-                layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
-                                       device=layout.device)
+        # elif self.layout_noise_dim > 0:
+        #     N, C, H, W = layout.size()
+        #     noise_shape = (N, self.layout_noise_dim, H, W)
+        #     if self.is_supervised:
+        #         layout_noise = self.im_to_noise_conv(imgs_src)
+        #     else:
+        #         layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
+        #                                device=layout.device)
 
-            layout = torch.cat([layout, layout_noise], dim=1)
+        #     layout = torch.cat([layout, layout_noise], dim=1)
 
-        img2 = self.decoder_net(layout)
+        # img2 = self.decoder_net(layout)
         #print('img1',img,'img2', img2)
 
         if get_layout_boxes:
             return img, boxes_pred, masks_pred, in_image, generated, layout_boxes
         else:
-            return img, boxes_pred, masks_pred, in_image, generated, img2, C_delta_latents, pred_vecs.size(0)
+            return img, boxes_pred, masks_pred, in_image, generated, img2, C_delta_latents
 
     def forward_visual_feats(self, img, boxes):
         """
