@@ -40,7 +40,7 @@ from simsg.metrics import jaccard
 from simsg.model import SIMSGModel
 from simsg.utils import int_tuple
 from simsg.utils import timeit, bool_flag, LossManager
-from simsg.recognizor import Recog
+from simsg.recognizor import Recog, ResNet
 
 from simsg.loader_utils import build_train_loaders
 from scripts.train_utils import *
@@ -327,7 +327,8 @@ def main(args):
 
   obj_discriminator, d_obj_kwargs = build_obj_discriminator(args, vocab)
   img_discriminator, d_img_kwargs = build_img_discriminator(args, vocab)
-  Recognizor = Recog(6, 128, args.batch_size *2)
+  # Recognizor = Recog(6, 128, args.batch_size *2)
+  Recognizor = ResNet(6, 128)
   Recognizor = Recognizor.to('cuda')
   optimizer_recognizor = torch.optim.Adam(Recognizor.parameters(),
                                        lr=args.learning_rate)
@@ -424,6 +425,7 @@ def main(args):
       # regcognizor:
       print('img dim', imgs_pred.size())
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
+      print('regress', regress_out.size())
       def calc_vc_loss(C_delta_latents, regress_out):
         prob_C = torch.nn.functional.softmax(regress_out, 1)
         print('C_latent', C_delta_latents.size())
