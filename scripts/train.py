@@ -328,7 +328,8 @@ def main(args):
   obj_discriminator, d_obj_kwargs = build_obj_discriminator(args, vocab)
   img_discriminator, d_img_kwargs = build_img_discriminator(args, vocab)
   # Recognizor = Recog(6, 128, args.batch_size *2)
-  Recognizor = ResNet(6, 128*474)
+  num_pred = 527
+  Recognizor = ResNet(6, 128*num_pred)
   Recognizor = Recognizor.to('cuda')
   optimizer_recognizor = torch.optim.Adam(Recognizor.parameters(),
                                        lr=args.learning_rate)
@@ -427,7 +428,7 @@ def main(args):
       # regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
       regress_out = torch.sum(regress_out, 0)
-      regress_out = regress_out.view(474, 128)
+      regress_out = regress_out.view(num_pred, 128)
       
       print('regress', regress_out.size())
       def calc_vc_loss(C_delta_latents, regress_out):
