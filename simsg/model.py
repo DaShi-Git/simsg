@@ -227,7 +227,7 @@ class SIMSGModel(nn.Module):
         edges = torch.stack([s, o], dim=1)  # Shape is (num_triples, 2)
 
         obj_vecs = self.obj_embeddings(objs)
-        print('obj_vec', obj_vecs.size())
+        #print('obj_vec', obj_vecs.size())
 
         if obj_to_img is None:
             obj_to_img = torch.zeros(num_objs, dtype=objs.dtype, device=objs.device)
@@ -385,6 +385,7 @@ class SIMSGModel(nn.Module):
             layout = torch.cat([layout, layout_noise], dim=1)
 
         img = self.decoder_net(layout)
+        print('layout', layout.size())
 
         # visualize layout for debugging purposes
         #if t % 50 == 0:
