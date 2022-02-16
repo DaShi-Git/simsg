@@ -436,6 +436,9 @@ def main(args):
         print('C_latent', C_delta_latents.size())
         print('prob_c', prob_C.size())
         print('regress', regress_out.size())
+        print('C device', C_delta_latents.get_device())
+        print('prob_c', prob_C.get_device())
+
         I_loss_C = C_delta_latents * torch.log(prob_C + 1e-12)
         I_loss_C = torch.sum(I_loss_C, 1)
         I_loss = - I_loss_C
