@@ -424,22 +424,22 @@ def main(args):
                                 args, skip_pixel_loss, imgs, imgs_pred,
                                 boxes, boxes_pred)
       # regcognizor:
-      print('img dim', imgs_pred.size())
-      print('img device', imgs_pred.get_device())
-      print('C_delta_latents device', C_delta_latents.get_device())
+      # print('img dim', imgs_pred.size())
+      # print('img device', imgs_pred.get_device())
+      # print('C_delta_latents device', C_delta_latents.get_device())
       # regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
       # regress_out = torch.sum(regress_out, 0)
       # regress_out = regress_out.view(num_pred, 128)
       
-      print('regress', regress_out.size())
+      #print('regress', regress_out.size())
       def calc_vc_loss(C_delta_latents, regress_out):
         prob_C = torch.nn.functional.softmax(regress_out, 1)
-        print('C_latent', C_delta_latents.size())
-        print('prob_c', prob_C.size())
-        print('regress', regress_out.size())
-        print('C device', C_delta_latents.get_device())
-        print('prob_c', prob_C.get_device())
+        # print('C_latent', C_delta_latents.size())
+        # print('prob_c', prob_C.size())
+        # print('regress', regress_out.size())
+        # print('C device', C_delta_latents.get_device())
+        # print('prob_c', prob_C.get_device())
 
         I_loss_C = C_delta_latents * torch.log(prob_C + 1e-12)
         I_loss_C = torch.sum(I_loss_C, 1)
@@ -452,6 +452,7 @@ def main(args):
 
       C_delta_latents = C_delta_latents.to('cuda')
       I_loss = calc_vc_loss(C_delta_latents, regress_out)
+      print('I loss', I_loss)
       total_loss = add_loss(total_loss, I_loss, losses,
                               'I_loss', args.d_img_weight)
 
