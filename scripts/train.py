@@ -123,7 +123,7 @@ def argument_parser():
   parser.add_argument('--d_img_weight', default=1.0, type=float) # multiplied by d_loss_weight
 
   # Output options
-  parser.add_argument('--print_every', default=1, type=int)
+  parser.add_argument('--print_every', default=500, type=int)
   parser.add_argument('--timing', default=False, type=bool_flag)
   parser.add_argument('--checkpoint_every', default=5000, type=int)
   parser.add_argument('--output_dir', default=os.getcwd())
