@@ -57,7 +57,7 @@ def argument_parser():
   parser.add_argument('--dataset', default='vg', choices=['vg', 'clevr'])
 
   # Optimization hyperparameters
-  parser.add_argument('--batch_size', default=8, type=int)
+  parser.add_argument('--batch_size', default=32, type=int)
   parser.add_argument('--num_iterations', default=300000, type=int)
   parser.add_argument('--learning_rate', default=2e-4, type=float)
 
