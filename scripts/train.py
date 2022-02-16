@@ -601,11 +601,11 @@ def main(args):
         d_img_losses.total_loss.backward()
         optimizer_d_img.step()
       
-      I_opt_losses = LossManager()
-      I_opt_losses.add_loss(I_loss, 'I_loss')
-      optimizer_recognizor.zero_grad()
-      I_opt_losses.total_loss.backward()
-      optimizer_recognizor.step()
+      # I_opt_losses = LossManager()
+      # I_opt_losses.add_loss(I_loss, 'I_loss')
+      # optimizer_recognizor.zero_grad()
+      # I_opt_losses.total_loss.backward()
+      # optimizer_recognizor.step()
 
       if t % args.print_every == 0:
 
