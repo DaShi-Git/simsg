@@ -427,6 +427,7 @@ def main(args):
       # regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
       regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
       regress_out = torch.sum(regress_out, 0)
+      regress_out = regress_out.view(474, 128)
       
       print('regress', regress_out.size())
       def calc_vc_loss(C_delta_latents, regress_out):
