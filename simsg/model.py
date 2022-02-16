@@ -381,7 +381,7 @@ class SIMSGModel(nn.Module):
             else:
                 layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
                                        device=layout.device)
-
+            print('layout', layout.size())
             layout = torch.cat([layout, layout_noise], dim=1)
 
         img = self.decoder_net(layout)
