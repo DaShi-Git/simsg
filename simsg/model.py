@@ -370,7 +370,7 @@ class SIMSGModel(nn.Module):
             in_image[:, :3, :, :] = layout_noise * in_image[:, 3:4, :, :] + in_image[:, :3, :, :] * (
                         1 - in_image[:, 3:4, :, :])
             img_feats = self.conv_img(in_image)
-            print('layout', layout.size())
+            #print('layout', layout.size())
             layout = torch.cat([layout, img_feats], dim=1)
 
         elif self.layout_noise_dim > 0:
@@ -381,11 +381,11 @@ class SIMSGModel(nn.Module):
             else:
                 layout_noise = torch.randn(noise_shape, dtype=layout.dtype,
                                        device=layout.device)
-            print('layout', layout.size())
+            #print('layout', layout.size())
             layout = torch.cat([layout, layout_noise], dim=1)
 
         img = self.decoder_net(layout)
-        print('layout', layout.size())
+        #print('layout', layout.size())
 
         # visualize layout for debugging purposes
         #if t % 50 == 0:
@@ -395,7 +395,7 @@ class SIMSGModel(nn.Module):
         # belong is for img2
 
         pred_vecs = pred_vecs_ori
-        print('pred_vec',pred_vecs.size())
+        #print('pred_vec',pred_vecs.size())
         obj_vecs = obj_vecs_ori
         #print('pred_vecs', pred_vecs.size())
         in_image = src_image.clone()
