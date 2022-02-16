@@ -447,7 +447,7 @@ def main(args):
         return I_loss
 
 
-
+      C_delta_latents = C_delta_latents.to('cuda')
       I_loss = calc_vc_loss(C_delta_latents, regress_out)
       total_loss = add_loss(total_loss, I_loss, losses,
                               'I_loss', args.d_img_weight)
