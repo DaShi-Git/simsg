@@ -393,6 +393,7 @@ class SIMSGModel(nn.Module):
         # belong is for img2
 
         pred_vecs = pred_vecs_ori
+        print('pred_vec',pred_vecs.size())
         obj_vecs = obj_vecs_ori
         #print('pred_vecs', pred_vecs.size())
         in_image = src_image.clone()
