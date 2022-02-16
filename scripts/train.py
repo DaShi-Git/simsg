@@ -443,7 +443,9 @@ def main(args):
 
         I_loss_C = C_delta_latents * torch.log(prob_C + 1e-12)
         I_loss_C = torch.sum(I_loss_C, 1)
-        print('I_loss size', I_loss_C.size())
+        #print('I_loss size', I_loss_C.size())
+        dim = I_loss_C.size(0).to(torch.int64)
+        I_loss_C = torch.sum(I_loss_C)/dim
         I_loss = - I_loss_C
         return I_loss
 
