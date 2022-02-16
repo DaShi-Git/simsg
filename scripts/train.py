@@ -424,7 +424,9 @@ def main(args):
                                 boxes, boxes_pred)
       # regcognizor:
       print('img dim', imgs_pred.size())
-      regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
+      # regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1), out_dim1)
+      regress_out = Recognizor(torch.cat([imgs_pred, imgs_pred2],1))
+      
       print('regress', regress_out.size())
       def calc_vc_loss(C_delta_latents, regress_out):
         prob_C = torch.nn.functional.softmax(regress_out, 1)
