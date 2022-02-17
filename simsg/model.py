@@ -410,7 +410,7 @@ class SIMSGModel(nn.Module):
 
         # a = torch.floor(torch.FloatTensor(10).uniform_(0, 5)).to(torch.int64)
         C_delta_latents = torch.nn.functional.one_hot(C_delta_latents, pred_vecs.size()[1])
-        epsilon = 0.4
+        epsilon = 1.0 #0.4
         delta_target = C_delta_latents*epsilon
         delta_target = delta_target.to('cuda')
         pred_vecs = delta_target + pred_vecs
