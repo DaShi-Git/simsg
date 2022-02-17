@@ -403,7 +403,7 @@ class SIMSGModel(nn.Module):
         dim1 = layout.size(1)
         dim2 = layout.size(2)
         dim3 = layout.size(3)
-        print(layout)
+        #print(layout)
 
         pred_vecs = layout.view(dim0, dim1*dim2*dim3)
 
