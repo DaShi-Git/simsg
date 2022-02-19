@@ -252,7 +252,7 @@ def check_model(args, t, loader, model):
 
       model_out = model(objs, triples, obj_to_img, boxes_gt=boxes, masks_gt=model_masks,
                         src_image=imgs_in, imgs_src=imgs_src)
-      imgs_pred, boxes_pred, masks_pred, _, _ = model_out
+      imgs_pred, boxes_pred, masks_pred, layout_mask, _, imgs_pred2, C_delta_latents = model_out
 
       skip_pixel_loss = False
       total_loss, losses = calculate_model_losses(
