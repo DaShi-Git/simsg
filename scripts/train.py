@@ -62,7 +62,7 @@ def argument_parser():
   parser.add_argument('--learning_rate', default=2e-4, type=float)
 
   # Switch the generator to eval mode after this many iterations
-  parser.add_argument('--eval_mode_after', default=10, type=int)
+  parser.add_argument('--eval_mode_after', default=100000, type=int)
 
   # Dataset options
   parser.add_argument('--image_size', default='64,64', type=int_tuple)
